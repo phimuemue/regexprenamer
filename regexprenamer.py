@@ -4,6 +4,8 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 
+import os
+
 class RegexpRenamer:
     def __init__(self):
         # the window itself
@@ -46,12 +48,14 @@ class RegexpRenamer:
         self.btnRename = gtk.Button("Rename")
         self.vbox1.pack_start(self.btnRename, False, False)
         # the liststore
-        self.liststore = gtk.ListStore(str, str)
+        self.liststore = gtk.ListStore(str, str, str)
         self.tv.set_model(self.liststore)
         self.tv.append_column(
-            gtk.TreeViewColumn("Original name", gtk.CellRendererText()))
+            gtk.TreeViewColumn("Original name", gtk.CellRendererText(), text=0))
         self.tv.append_column(
-            gtk.TreeViewColumn("New name", gtk.CellRendererText()))
+            gtk.TreeViewColumn("New name", gtk.CellRendererText(), text=1))
+        self.tv.append_column(
+            gtk.TreeViewColumn("Directory", gtk.CellRendererText(), text=2))
         # show window with all its widgets
         self.window.resize(320,240)
         self.window.show_all()
@@ -68,7 +72,11 @@ class RegexpRenamer:
         print selection.data
         if target_type == 80:
             uri = selection.data.strip('\r\n\x00')
-            print uri
+            files = uri.split("\n")
+            for f in files:
+                self.liststore.append([os.path.basename(f).strip(),"",os.path.dirname(f)])
+            print files
+        self.tv.set_model(self.liststore)
 
     def destroy(self, widget, data=None):
         gtk.main_quit()
