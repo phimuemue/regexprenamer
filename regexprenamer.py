@@ -31,24 +31,30 @@ class RegexpRenamer:
         #                       gtk.DEST_DEFAULT_DROP,
         #                       [("text/uri-list",0,0)], gtk.gdk.ACTION_COPY)
         # bottom "navigation"
-        self.inputgrid = gtk.HBox(2)
+        self.inputgrid = gtk.HBox(False)
         self.vbox1.pack_start(self.inputgrid, False, False)
         self.labelbox = gtk.VBox(2)
+        self.labelbox.set_border_width(5)
         self.txtbox = gtk.VBox(2)
+        self.txtbox.set_border_width(5)
         self.inputgrid.pack_start(self.labelbox, False, False)
-        self.inputgrid.pack_start(self.txtbox, False, False)
+        self.inputgrid.pack_start(self.txtbox, True, True)
         # labels 
-        self.lblregexp = gtk.Label("Regexp")
+        self.lblregexp = gtk.Label("Regexp:")
         self.labelbox.pack_start(self.lblregexp, False, False)
-        self.lblreplacement = gtk.Label("Replacement")
+        self.lblregexp.set_alignment(0,0.5)
+        self.lblreplacement = gtk.Label("Replacement:")
         self.labelbox.pack_start(self.lblreplacement, False, False)
+        self.lblreplacement.set_alignment(0,0.5)
         # input fields
         self.txtregex = gtk.Entry()
         self.txtbox.pack_start(self.txtregex, True, True)
-        self.txtregex.set_text(".*")
+        self.txtregex.set_text("(.*)")
+        self.txtregex.connect("focus-out-event", self.onpreview)
         self.txtreplacement = gtk.Entry()
         self.txtbox.pack_start(self.txtreplacement, True, True)
-        self.txtreplacement.set_text("\\0")
+        self.txtreplacement.set_text("\\1")
+        self.txtreplacement.connect("focus-out-event", self.onpreview)
         # button
         self.btnRename = gtk.Button("Rename")
         self.vbox1.pack_start(self.btnRename, False, False)
@@ -63,7 +69,7 @@ class RegexpRenamer:
         self.tv.append_column(
             gtk.TreeViewColumn("Directory", gtk.CellRendererText(), text=2))
         # show window with all its widgets
-        self.window.resize(320,240)
+        self.window.resize(400,300)
         self.window.show_all()
 
     def on_drag_data_received(self, 
@@ -83,13 +89,14 @@ class RegexpRenamer:
                 self.liststore.append(
                     [os.path.basename(f).strip(),"",os.path.dirname(f)])
             print files
-        self.tv.set_model(self.liststore)
+        self.onpreview(self, None)
 
-    def onpreview(self, widget):
+    def onpreview(self, widget, event=None):
         for i in self.liststore:
             i[1]=re.sub(self.txtregex.get_text(),
                         self.txtreplacement.get_text(),
                         i[0])
+        return False
 
 
     def destroy(self, widget, data=None):
