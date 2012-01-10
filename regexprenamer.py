@@ -5,6 +5,7 @@ pygtk.require("2.0")
 import gtk
 
 import os
+import re
 
 class RegexpRenamer:
     def __init__(self):
@@ -44,11 +45,14 @@ class RegexpRenamer:
         # input fields
         self.txtregex = gtk.Entry()
         self.txtbox.pack_start(self.txtregex, True, True)
+        self.txtregex.set_text(".*")
         self.txtreplacement = gtk.Entry()
         self.txtbox.pack_start(self.txtreplacement, True, True)
+        self.txtreplacement.set_text("\\0")
         # button
         self.btnRename = gtk.Button("Rename")
         self.vbox1.pack_start(self.btnRename, False, False)
+        self.btnRename.connect("pressed",self.onpreview)
         # the liststore
         self.liststore = gtk.ListStore(str, str, str)
         self.tv.set_model(self.liststore)
@@ -76,9 +80,17 @@ class RegexpRenamer:
             uri = selection.data.strip('\r\n\x00')
             files = uri.split("\n")
             for f in files:
-                self.liststore.append([os.path.basename(f).strip(),"",os.path.dirname(f)])
+                self.liststore.append(
+                    [os.path.basename(f).strip(),"",os.path.dirname(f)])
             print files
         self.tv.set_model(self.liststore)
+
+    def onpreview(self, widget):
+        for i in self.liststore:
+            i[1]=re.sub(self.txtregex.get_text(),
+                        self.txtreplacement.get_text(),
+                        i[0])
+
 
     def destroy(self, widget, data=None):
         gtk.main_quit()
