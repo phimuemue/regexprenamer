@@ -16,9 +16,11 @@ class RegexpRenamer:
         # general layout
         self.vbox1 = gtk.VBox(False)
         self.window.add(self.vbox1)
-        # tree-view
+        # tree-view with scroller
+        self.tvscroll = gtk.ScrolledWindow()
+        self.vbox1.pack_start(self.tvscroll, True, True, 0)
         self.tv = gtk.TreeView()
-        self.vbox1.pack_start(self.tv, True, True, 0)
+        self.tvscroll.add(self.tv)
         self.tv.connect("drag_data_received", self.on_drag_data_received)
         self.tv.enable_model_drag_dest([("text/uri-list",0,80)],
                                        gtk.gdk.ACTION_DEFAULT |
