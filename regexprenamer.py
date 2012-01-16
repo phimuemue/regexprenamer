@@ -60,7 +60,7 @@ class RegexpRenamer:
         # button
         self.btnRename = gtk.Button("Rename")
         self.vbox1.pack_start(self.btnRename, False, False)
-        self.btnRename.connect("pressed",self.onpreview)
+        self.btnRename.connect("pressed",self.onrename)
         # the liststore
         self.liststore = gtk.ListStore(str, str, str, str)
         self.tv.set_model(self.liststore)
@@ -92,6 +92,7 @@ class RegexpRenamer:
             uri = selection.data.strip('\r\n\x00')
             files = uri.split("\n")
             files = [f.strip() for f in files]
+            files = [f[7:] if f.startswith("file://") else f for f in files]
             print files
             for f in files:
                 print "file: " + f
@@ -109,6 +110,12 @@ class RegexpRenamer:
                         i[0])
         return False
 
+    def onrename(self, widget, event=None):
+        self.onpreview(widget, event)
+        for i in self.liststore:
+            print "Renaming %s to %s"%(i[0], i[1])
+            os.rename(os.path.join(i[2],i[0]), os.path.join(i[2],i[1]))
+        return True
 
     def destroy(self, widget, data=None):
         gtk.main_quit()
