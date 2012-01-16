@@ -4,6 +4,8 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 
+import gio
+
 import os
 import re
 
@@ -60,10 +62,16 @@ class RegexpRenamer:
         self.vbox1.pack_start(self.btnRename, False, False)
         self.btnRename.connect("pressed",self.onpreview)
         # the liststore
-        self.liststore = gtk.ListStore(str, str, str)
+        self.liststore = gtk.ListStore(str, str, str, str)
         self.tv.set_model(self.liststore)
-        self.tv.append_column(
-            gtk.TreeViewColumn("Original name", gtk.CellRendererText(), text=0))
+        cellpb = gtk.CellRendererPixbuf()
+        colorigname = gtk.TreeViewColumn("Original name", text=0)
+        cellt = gtk.CellRendererText()
+        self.tv.append_column(colorigname)
+        colorigname.pack_start(cellpb, False)
+        colorigname.pack_start(cellt)
+        colorigname.set_attributes(cellt, text=0)
+        colorigname.set_attributes(cellpb, icon_name=3)
         self.tv.append_column(
             gtk.TreeViewColumn("New name", gtk.CellRendererText(), text=1))
         self.tv.append_column(
@@ -87,7 +95,12 @@ class RegexpRenamer:
             files = uri.split("\n")
             for f in files:
                 self.liststore.append(
-                    [os.path.basename(f).strip(),"",os.path.dirname(f)])
+                    [os.path.basename(f).strip(),
+                     "",
+                     os.path.dirname(f),
+                     gio.File(f).query_info("standard::icon").get_icon().get_names()[0]])
+                print gio.File(f).query_info("standard::icon").get_icon().get_names()
+                print gio.File(f).query_info("standard::icon").get_icon()
             print files
         self.onpreview(self, None)
 
