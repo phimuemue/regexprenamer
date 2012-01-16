@@ -88,20 +88,18 @@ class RegexpRenamer:
                               selection,
                               target_type,
                               timestamp):
-        print target_type
-        print selection.data
         if target_type == 80:
             uri = selection.data.strip('\r\n\x00')
             files = uri.split("\n")
+            files = [f.strip() for f in files]
+            print files
             for f in files:
+                print "file: " + f
                 self.liststore.append(
                     [os.path.basename(f).strip(),
                      "",
                      os.path.dirname(f),
                      gio.File(f).query_info("standard::icon").get_icon().get_names()[0]])
-                print gio.File(f).query_info("standard::icon").get_icon().get_names()
-                print gio.File(f).query_info("standard::icon").get_icon()
-            print files
         self.onpreview(self, None)
 
     def onpreview(self, widget, event=None):
