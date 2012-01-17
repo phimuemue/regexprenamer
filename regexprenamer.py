@@ -19,6 +19,7 @@ class RegexpRenamer:
         # general layout
         self.vbox1 = gtk.VBox(False)
         self.window.add(self.vbox1)
+        self.vbox1.set_property("spacing", 2)
         # toolbar
         self.toolbar = gtk.Toolbar()
         self.vbox1.pack_start(self.toolbar, False, True, 0)
@@ -81,6 +82,14 @@ class RegexpRenamer:
             gtk.TreeViewColumn("New name", gtk.CellRendererText(), text=1))
         self.tv.append_column(
             gtk.TreeViewColumn("Directory", gtk.CellRendererText(), text=2))
+        # statusbar
+        self.statusbar = gtk.Statusbar()
+        self.statusbar.set_property("has-resize-grip", False)
+        self.vbox1.pack_end(self.statusbar, False, True)
+        self.pb = gtk.ProgressBar()
+        self.statusbar.pack_start(self.pb)
+        cid = self.statusbar.get_context_id("Renamer")
+        self.statusbar.push(cid, "Renamer")
         # show window with all its widgets
         self.window.resize(400,300)
         self.window.show_all()
@@ -143,9 +152,17 @@ class RegexpRenamer:
 
     def onrename(self, widget, event=None):
         self.onpreview(widget, event)
+        c = 0
         for i in self.liststore:
-            print "Renaming %s to %s"%(i[0], i[1])
-            os.rename(os.path.join(i[2],i[0]), os.path.join(i[2],i[1]))
+            if not os.path.exists(i[0]):
+                print "Warning: %s does not exist. Skipping."%(i[0])
+            else:
+                print "Renaming %s to %s"%(i[0], i[1])
+                os.rename(os.path.join(i[2],i[0]), os.path.join(i[2],i[1]))
+            c = c + 1
+            frac = float(c)/len(self.liststore)
+            print "Fraction %f"%(frac)
+            self.pb.set_fraction(float(c)/len(self.liststore))
         return True
 
     def destroy(self, widget, data=None):
