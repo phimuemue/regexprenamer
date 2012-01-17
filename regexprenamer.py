@@ -19,6 +19,12 @@ class RegexpRenamer:
         # general layout
         self.vbox1 = gtk.VBox(False)
         self.window.add(self.vbox1)
+        # toolbar
+        self.toolbar = gtk.Toolbar()
+        self.vbox1.pack_start(self.toolbar, False, True, 0)
+        iconw = gtk.Image()
+        iconw.set_from_stock(gtk.STOCK_ADD, 16)
+        self.toolbar.append_item("Add file", "Add another file to be renamed.", "Private info", iconw, self.on_add_file)
         # tree-view with scroller
         self.tvscroll = gtk.ScrolledWindow()
         self.vbox1.pack_start(self.tvscroll, True, True, 0)
@@ -28,10 +34,6 @@ class RegexpRenamer:
         self.tv.enable_model_drag_dest([("text/uri-list",0,80)],
                                        gtk.gdk.ACTION_DEFAULT |
                                        gtk.gdk.ACTION_COPY)
-        # self.tv.drag_dest_set(gtk.DEST_DEFAULT_MOTION |
-        #                       gtk.DEST_DEFAULT_HIGHLIGHT |
-        #                       gtk.DEST_DEFAULT_DROP,
-        #                       [("text/uri-list",0,0)], gtk.gdk.ACTION_COPY)
         # bottom "navigation"
         self.inputgrid = gtk.HBox(False)
         self.vbox1.pack_start(self.inputgrid, False, False)
@@ -96,12 +98,30 @@ class RegexpRenamer:
             print files
             for f in files:
                 print "file: " + f
-                self.liststore.append(
+                self.add_file(f)
+        self.onpreview(self, None)
+
+    def on_add_file(self, widget, event=None, filename=None):
+        chooser = gtk.FileChooserDialog(title="Add files",
+                                        action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                        buttons=(gtk.STOCK_CANCEL,
+                                                 gtk.RESPONSE_CANCEL,
+                                                 gtk.STOCK_OK,
+                                                 gtk.RESPONSE_OK))
+        chooser.set_select_multiple(True)
+        response = chooser.run()
+        if (response==gtk.RESPONSE_OK):
+            files = chooser.get_filenames()
+            for f in files:
+                self.add_file(f)
+        chooser.destroy()
+
+    def add_file(self, f):
+        self.liststore.append(
                     [os.path.basename(f).strip(),
                      "",
                      os.path.dirname(f),
-                     gio.File(f).query_info("standard::icon").get_icon().get_names()[0]])
-        self.onpreview(self, None)
+                     gio.File(f).query_info("standard::icon").get_icon().get_names()[0]])        
 
     def onpreview(self, widget, event=None):
         for i in self.liststore:
