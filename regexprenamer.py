@@ -23,8 +23,11 @@ class RegexpRenamer:
         self.toolbar = gtk.Toolbar()
         self.vbox1.pack_start(self.toolbar, False, True, 0)
         iconw = gtk.Image()
-        iconw.set_from_stock(gtk.STOCK_ADD, 16)
+        iconw.set_from_stock(gtk.STOCK_ADD, gtk.ICON_SIZE_BUTTON)
         self.toolbar.append_item("Add file", "Add another file to be renamed.", "Private info", iconw, self.on_add_file)
+        iconw = gtk.Image()
+        iconw.set_from_stock(gtk.STOCK_REMOVE, gtk.ICON_SIZE_BUTTON)
+        self.toolbar.append_item("Remove file", "Remove selected file from list.", "Private info", iconw, self.on_remove_file)
         # tree-view with scroller
         self.tvscroll = gtk.ScrolledWindow()
         self.vbox1.pack_start(self.tvscroll, True, True, 0)
@@ -101,7 +104,15 @@ class RegexpRenamer:
                 self.add_file(f)
         self.onpreview(self, None)
 
-    def on_add_file(self, widget, event=None, filename=None):
+    def on_remove_file(self, widget, event=None):
+        selection = self.tv.get_selection()
+        model, s_iter = selection.get_selected()
+        if (s_iter):
+            item = self.liststore.remove(s_iter)
+            print "Selection!"
+        print selection
+
+    def on_add_file(self, widget, event=None):
         chooser = gtk.FileChooserDialog(title="Add files",
                                         action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                         buttons=(gtk.STOCK_CANCEL,
